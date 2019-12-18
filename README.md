@@ -4,7 +4,9 @@
 Scaleable Websockets over Queues
 
 
-The goal of this project is to decouple websocket front-ends from the worker nodes that carry out server-side work. This allows shaping and throttling for workers.
+The goal of this project is to decouple websocket front-ends from the worker nodes that carry out server-side work. This allows shaping and throttling for workers. Later on this will allow clients to reconnect with their old ID.
+
+---
 
 Currently the project supports the following:
 - Adding a Gorilla websocket client to the default http mux.
