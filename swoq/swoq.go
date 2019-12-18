@@ -27,7 +27,6 @@ func ConfigureWebServer(wsUrl string) {
 	})
 }
 
-//StartReplier reads from the Queue and writes to the hub
 func startReplier(client *ws.Client) {
 	queue.Subscribe(client.GetReplyQueueName(), func(m *nats.Msg) {
 		client.Send(m.Data)
