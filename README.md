@@ -1,4 +1,4 @@
-# Scaleable Websockets over Queues (swoq)
+# Scale by Websocket over Queues (swoq)
 <a href="https://github.com/just1689/swoq/releases"><img src="https://img.shields.io/badge/version-alpha-blue" /></a>&nbsp;
 
 
