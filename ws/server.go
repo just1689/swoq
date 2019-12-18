@@ -28,7 +28,7 @@ type Hub struct {
 
 	publisher func(body []byte)
 
-	replier func(id string)
+	replier func(client *Client)
 }
 
 func (h *Hub) GetClientByID(id string) (found bool, client *Client) {
@@ -41,7 +41,7 @@ func (h *Hub) GetClientByID(id string) (found bool, client *Client) {
 	return
 }
 
-func NewHub(publisher func(body []byte), replier func(id string)) *Hub {
+func NewHub(publisher func(body []byte), replier func(client *Client)) *Hub {
 	return &Hub{
 		broadcast:  make(chan []byte),
 		register:   make(chan *Client),
@@ -114,6 +114,10 @@ type Client struct {
 
 func (c *Client) Send(b []byte) {
 	c.send <- b
+}
+
+func (c *Client) GetReplyQueueName() string {
+	return "client." + c.ClientID
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -208,23 +212,10 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	}
 	client := &Client{hub: hub, ClientID: uuid.New().String(), conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
-	hub.replier(client.ClientID)
+	hub.replier(client)
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
 	go client.writePump()
 	go client.readPump()
-}
-
-func ServeHome(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL)
-	if r.URL.Path != "/" {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	http.ServeFile(w, r, "home.html")
 }

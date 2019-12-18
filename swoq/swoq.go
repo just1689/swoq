@@ -5,6 +5,7 @@ import (
 	"github.com/just1689/swoq/ws"
 	"github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
+	"log"
 	"net/http"
 )
 
@@ -23,22 +24,29 @@ func StartWebServer(listenAddr string, wsUrl string) {
 }
 
 func ConfigureWebServer(wsUrl string) {
-	http.HandleFunc("/", ws.ServeHome)
+	http.HandleFunc("/", ServeHome)
 	http.HandleFunc(wsUrl, func(w http.ResponseWriter, r *http.Request) {
 		ws.ServeWs(hub, w, r)
 	})
 }
 
 //StartReplier reads from the Queue and writes to the hub
-func StartReplier(id string) {
-	found, client := hub.GetClientByID(id)
-	if !found {
-		//TODO: Should exist at this time?
-		logrus.Errorln("failed to start replier - client not found by id: ", id)
-		return
-	}
-	queue.Subscribe(id, func(m *nats.Msg) {
+func StartReplier(client *ws.Client) {
+	queue.Subscribe(client.GetReplyQueueName(), func(m *nats.Msg) {
 		client.Send(m.Data)
 	})
 
+}
+
+func ServeHome(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL)
+	if r.URL.Path != "/" {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	http.ServeFile(w, r, "home.html")
 }
