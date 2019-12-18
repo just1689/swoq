@@ -14,9 +14,10 @@ var incQName = "incoming"
 
 func main() {
 	flag.Parse()
-	swoq.StartQueueClient(incQName)
+	swoq.StartQueueClient()
+
 	go createExampleIO()
-	swoq.StartWebServer(":8080", "/ws")
+	swoq.StartWebServer(":8080", "/ws", incQName)
 }
 
 func createExampleIO() {
