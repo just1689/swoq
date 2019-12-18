@@ -31,6 +31,7 @@ func Subscribe(subj string, handler func(m *nats.Msg)) (close func()) {
 	sub, err := DefaultConn.Subscribe(subj, handler)
 	if err != nil {
 		//TODO: figure out how we can handle this? Retry?
+		logrus.Panicln(err)
 	}
 	close = func() {
 		sub.Unsubscribe()
