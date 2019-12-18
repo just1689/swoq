@@ -43,7 +43,6 @@ func (h *Hub) GetClientByID(id string) (found bool, client *Client) {
 
 func NewHub(publisher func(body []byte), replier func(client *Client)) *Hub {
 	return &Hub{
-		broadcast:  make(chan []byte),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
@@ -213,6 +212,7 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	client := &Client{hub: hub, ClientID: uuid.New().String(), conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
 	hub.replier(client)
+	logrus.Println("New client: ", client.ClientID)
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
