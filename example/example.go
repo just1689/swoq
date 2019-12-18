@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"github.com/just1689/swoq/queue"
 	"github.com/just1689/swoq/swoq"
 	"github.com/just1689/swoq/ws"
@@ -13,7 +12,6 @@ import (
 var incQName = "incoming"
 
 func main() {
-	flag.Parse()
 	swoq.StartQueueClient()
 
 	go createExampleIO()
