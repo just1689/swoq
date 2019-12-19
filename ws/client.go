@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -14,6 +15,7 @@ type Client struct {
 	ClientID string
 	conn     *websocket.Conn
 	send     chan []byte
+	unSub    func()
 }
 
 func (c *Client) Send(b []byte) {
@@ -24,10 +26,16 @@ func (c *Client) GetReplyQueueName() string {
 	return "client." + c.ClientID
 }
 
+func (c *Client) RemoveMeCleanly() {
+	logrus.Println("Removing client ", c.ClientID)
+	c.hub.unregister <- c
+	c.conn.Close()
+	c.unSub()
+}
+
 func (c *Client) readPump() {
 	defer func() {
-		c.hub.unregister <- c
-		c.conn.Close()
+		c.RemoveMeCleanly()
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -36,11 +44,17 @@ func (c *Client) readPump() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				logrus.Println("Could not read as the socket is closed")
 				log.Printf("error: %v", err)
 			}
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		if string(message[0:1]) == "." {
+			commands := strings.Split(string(message), ".")
+			c.handleCommands(commands[1], commands[2])
+			continue
+		}
 
 		w := WrappedMessage{
 			ClientID: c.ClientID,
@@ -60,14 +74,13 @@ func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		c.conn.Close()
+		c.RemoveMeCleanly()
 	}()
 	for {
 		select {
 		case message, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				// The hub closed the channel.
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
@@ -88,4 +101,14 @@ func (c *Client) writePump() {
 			}
 		}
 	}
+}
+
+func (c *Client) handleCommands(key, value string) {
+	if key == "id" {
+		c.unSub()
+		logrus.Println("Client reconnected: ", value)
+		c.ClientID = value
+		c.unSub = c.hub.replier(c)
+	}
+
 }

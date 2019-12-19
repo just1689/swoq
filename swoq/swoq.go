@@ -27,9 +27,9 @@ func ConfigureWebServer(wsUrl string) {
 	})
 }
 
-func startReplier(client *ws.Client) {
-	queue.Subscribe(client.GetReplyQueueName(), func(m *nats.Msg) {
+func startReplier(client *ws.Client) (unSub func()) {
+	unSub = queue.Subscribe(client.GetReplyQueueName(), func(m *nats.Msg) {
 		client.Send(m.Data)
 	})
-
+	return
 }

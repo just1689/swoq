@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	"log"
 	"net/url"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -39,6 +43,18 @@ func main() {
 				return
 			}
 			log.Printf("recv: %s", message)
+		}
+	}()
+
+	go func() {
+		for {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Print("Enter text: ")
+			text, _ := reader.ReadString('\n')
+			text = strings.ReplaceAll(text, "\n", "")
+			msg := ".id." + text
+			fmt.Println(text)
+			c.WriteMessage(websocket.BinaryMessage, []byte(msg))
 		}
 	}()
 

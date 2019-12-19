@@ -5,10 +5,10 @@ type Hub struct {
 	register   chan *Client
 	unregister chan *Client
 	publisher  func(body []byte)
-	replier    func(client *Client)
+	replier    func(client *Client) func()
 }
 
-func NewHub(publisher func(body []byte), replier func(client *Client)) *Hub {
+func NewHub(publisher func(body []byte), replier func(client *Client) func()) *Hub {
 	return &Hub{
 		register:   make(chan *Client),
 		unregister: make(chan *Client),

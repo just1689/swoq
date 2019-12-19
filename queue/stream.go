@@ -35,7 +35,6 @@ func Subscribe(subj string, handler func(m *nats.Msg)) (close func()) {
 	}
 	close = func() {
 		sub.Unsubscribe()
-		sub.Drain()
 	}
 	return
 

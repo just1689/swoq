@@ -36,7 +36,7 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 
 	client := &Client{hub: hub, ClientID: id, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
-	hub.replier(client)
+	client.unSub = hub.replier(client)
 
 	go client.writePump()
 	go client.readPump()
