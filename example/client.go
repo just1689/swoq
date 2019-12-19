@@ -50,7 +50,7 @@ func main() {
 		for {
 			time.Sleep(1500 * time.Millisecond)
 			reader := bufio.NewReader(os.Stdin)
-			fmt.Print("Enter text: ")
+			fmt.Print("Enter id to inherit: ")
 			text, _ := reader.ReadString('\n')
 			text = strings.ReplaceAll(text, "\n", "")
 			msg := ".id." + text
