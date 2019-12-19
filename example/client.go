@@ -48,6 +48,7 @@ func main() {
 
 	go func() {
 		for {
+			time.Sleep(1500 * time.Millisecond)
 			reader := bufio.NewReader(os.Stdin)
 			fmt.Print("Enter text: ")
 			text, _ := reader.ReadString('\n')
