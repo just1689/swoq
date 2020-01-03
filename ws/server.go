@@ -4,7 +4,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
-	"log"
 	"net/http"
 	"time"
 )
@@ -28,11 +27,11 @@ var (
 func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		logrus.Errorln(err)
 		return
 	}
 	id := uuid.New().String()
-	logrus.Println("New client: ", id)
+	logrus.Infoln("New client: ", id)
 
 	client := &Client{hub: hub, ClientID: id, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
