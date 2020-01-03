@@ -8,8 +8,12 @@ import (
 var DefaultConn *nats.Conn
 
 func BuildDefaultConn() {
+	BuildDefaultConnFromUrl(nats.DefaultURL)
+}
+
+func BuildDefaultConnFromUrl(u string) {
 	var err error
-	DefaultConn, err = nats.Connect(nats.DefaultURL)
+	DefaultConn, err = nats.Connect(u)
 	if err != nil {
 		logrus.Panic(err)
 	}
