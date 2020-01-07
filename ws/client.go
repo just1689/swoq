@@ -56,12 +56,11 @@ func (c *Client) readPump() {
 			continue
 		}
 
-		w := WrappedMessage{
+		var b []byte
+		if b, err = json.Marshal(WrappedMessage{
 			ClientID: c.ClientID,
 			Body:     message,
-		}
-		b, err := json.Marshal(w)
-		if err != nil {
+		}); err != nil {
 			logrus.Errorln(err)
 			continue
 		}
