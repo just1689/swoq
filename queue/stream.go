@@ -30,15 +30,12 @@ func Publish(subj, body string) {
 	DefaultConn.Publish(subj, []byte(body))
 }
 
-func Subscribe(subj string, handler func(m *nats.Msg)) (close func()) {
-
-	sub, err := DefaultConn.Subscribe(subj, handler)
+func Subscribe(subj string, handler func(m *nats.Msg)) (unsub *nats.Subscription) {
+	var err error
+	unsub, err = DefaultConn.Subscribe(subj, handler)
 	if err != nil {
 		//TODO: figure out how we can handle this? Retry?
 		logrus.Panicln(err)
-	}
-	close = func() {
-		sub.Unsubscribe()
 	}
 	return
 
