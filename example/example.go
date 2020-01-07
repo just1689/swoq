@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/just1689/swoq/queue"
 	"github.com/just1689/swoq/swoq"
 	"github.com/just1689/swoq/ws"
@@ -40,6 +41,7 @@ func createExampleIO() {
 			logrus.Errorln(err)
 			return
 		}
+		fmt.Println(w.ClientID, msg.Name)
 		reply := "hello " + msg.Name + "!"
 		queue.Publish("client."+w.ClientID, reply)
 	})
